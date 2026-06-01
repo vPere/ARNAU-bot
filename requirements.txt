@@ -1,0 +1,9 @@
+python-telegram-bot
+discord.py
+anthropic
+python-nmap
+shodan
+wakeonlan
+proxmoxer
+python-dotenv
+boto3

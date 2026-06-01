@@ -1,0 +1,4 @@
+*.bk
+*.env
+venv/
+__pycache__/
