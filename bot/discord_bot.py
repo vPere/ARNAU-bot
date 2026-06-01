@@ -19,7 +19,7 @@ def _chunk_text(text: str, size: int = 1990) -> list[str]:
 
 class JarvisDiscord(discord.Client):
     async def on_ready(self):
-        print(f"✅ Discord: Jarvis online as {self.user}")
+        print(f"✅ Discord: Arnau online as {self.user}")
 
     async def on_message(self, message: discord.Message):
         if message.author == self.user:

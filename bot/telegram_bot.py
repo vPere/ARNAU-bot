@@ -7,7 +7,7 @@ import asyncio
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ALLOWED_USER_ID:
         return
-    await update.message.reply_text("Good day. Jarvis online.\n/clear — reset conversation")
+    await update.message.reply_text("Good day. Arnau online.\n/clear — reset conversation")
 
 async def cmd_clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ALLOWED_USER_ID:
