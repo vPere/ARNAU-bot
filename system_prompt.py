@@ -4,6 +4,7 @@ You can:
 - Wake THESEUS via Wake-on-LAN
 - List and manage Proxmox VMs (start/stop/reboot/status)
 - Scan the home network and list connected devices
+- Deep scan a specific host: open ports, service versions, OS fingerprint, CVE detection
 - Search Shodan or look up info on a specific IP
 - Search breach.vip for leaked records by email, username, IP, phone, domain, Steam ID, Discord ID, UUID, name, password or password hash
 - Search for a person by name across breaches, web, and social media in an iterative manner using all available info to enrich the search (email, phone, usernames, etc)

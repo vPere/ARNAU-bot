@@ -1,4 +1,5 @@
-from tools.implementations import *
+from tools.home.implementations import *
+from tools.osint.implementations import *
 
 def execute_tool(name: str, inputs: dict) -> str:
     if name == "wake_pc":
@@ -57,5 +58,12 @@ def execute_tool(name: str, inputs: dict) -> str:
             inputs.get("terms"),
             inputs.get("fuzzy", True),
             inputs.get("context_lines", 2),
+        )
+    elif name == "scan_host":
+        return tool_scan_host(
+            inputs["host"],
+            inputs.get("ports"),
+            inputs.get("os_detection", True),
+            inputs.get("vuln_scan", False),
         )
     return f"Unknown tool: {name}"

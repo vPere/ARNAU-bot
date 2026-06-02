@@ -86,5 +86,35 @@ TOOLS = [
         },
         "required": ["origin", "destination"]
         }
+    },
+    {
+    "name": "scan_host",
+    "description": (
+        "Deep scan a specific host: open ports with service/version detection, "
+        "OS fingerprinting, and optional vulnerability detection via nmap scripts. "
+        "Use this on a specific IP or hostname, not a whole subnet."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "host": {
+                "type": "string",
+                "description": "IP address or hostname to scan"
+            },
+            "ports": {
+                "type": "string",
+                "description": "Port range to scan (default: top 1000). Examples: '22,80,443', '1-65535', '1-1024'"
+            },
+            "os_detection": {
+                "type": "boolean",
+                "description": "Attempt OS fingerprinting (requires root, default: true)"
+            },
+            "vuln_scan": {
+                "type": "boolean",
+                "description": "Run nmap vuln scripts to detect known CVEs (slower, default: false)"
+            }
+        },
+        "required": ["host"]
     }
+ },
 ]
