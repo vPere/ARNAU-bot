@@ -17,7 +17,7 @@ def _chunk_text(text: str, size: int = 1990) -> list[str]:
         text = text[split_at:].lstrip("\n")
     return chunks
 
-class JarvisDiscord(discord.Client):
+class ArnauDiscord(discord.Client):
     async def on_ready(self):
         print(f"✅ Discord: Arnau online as {self.user}")
 
@@ -40,4 +40,4 @@ class JarvisDiscord(discord.Client):
 async def run():
     intents = discord.Intents.default()
     intents.message_content = True
-    await JarvisDiscord(intents=intents).start(DISCORD_TOKEN)
+    await ArnauDiscord(intents=intents).start(DISCORD_TOKEN)
