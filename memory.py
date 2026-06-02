@@ -1,7 +1,10 @@
 from config import bedrock, BEDROCK_MODEL
-from tools.definitions import TOOLS, SYSTEM_PROMPT
+from tools.osint.definitions import TOOLS as OSINT_TOOLS
+from tools.home.definitions import TOOLS as HOME_TOOLS
 from tools.executor import execute_tool
+from system_prompt import SYSTEM_PROMPT
 
+TOOLS = OSINT_TOOLS + HOME_TOOLS
 conversations: dict[str, list] = {}
 
 async def process_message(user_id: str, text: str) -> str:
