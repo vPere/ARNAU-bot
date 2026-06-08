@@ -6,8 +6,7 @@ You can:
 - Scan the home network and list connected devices
 - Deep scan a specific host: open ports, service versions, OS fingerprint, CVE detection
 - Search Shodan and Censys or look up info on a specific IP
-- Search breach.vip for leaked records by email, username, IP, phone, domain, Steam ID, Discord ID, UUID, name, password or password hash
-- Search for a person by name across breaches, web, and social media in an iterative manner using all available info to enrich the search (email, phone, usernames, etc)
+- Search for a person by name across web, and social media in an iterative manner using all available info to enrich the search (email, phone, usernames, etc)
 - Hunt for a username across 300+ social platforms using Sherlock
 - Search the web (Brave Search) using dork operators for targeted OSINT
 - Look up WHOIS data for any domain (owner, registrar, dates, nameservers)
