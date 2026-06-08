@@ -1,5 +1,6 @@
 import subprocess
 import shodan as shodan_api
+import censys.search
 from config import *
 
 def tool_shodan_query(query_type: str, query: str) -> str:
@@ -83,6 +84,65 @@ def tool_whois_lookup(domain: str) -> str:
     except Exception as e:
         return f"WHOIS error: {e}"
 
+
+def tool_censys_query(query_type: str, query: str) -> str:
+    if not CENSYS_API_ID or not CENSYS_API_SECRET:
+        return "Censys not configured. Set CENSYS_API_ID and CENSYS_API_SECRET in .env"
+    try:
+        from censys.search import CensysHosts
+        from censys.common.exceptions import (
+            CensysRateLimitExceededException,
+            CensysUnauthorizedException,
+        )
+
+        h = CensysHosts(api_id=CENSYS_API_ID, api_secret=CENSYS_API_SECRET)
+
+        if query_type == "host":
+            r = h.view(query)
+
+            location = r.get("location", {})
+            asn      = r.get("autonomous_system", {})
+            services = r.get("services", [])
+
+            svc_lines = [
+                f"  {s.get('port', '?')}/{s.get('transport_protocol', '?'):<4} "
+                f"{s.get('service_name', '?')}"
+                for s in services[:15]
+            ]
+
+            lines = [
+                f"🌐 Censys: {r.get('ip', query)}",
+                f"📍 {location.get('city', '?')}, {location.get('country', '?')}",
+                f"🏢 AS{asn.get('asn', '?')} — {asn.get('name', 'unknown')}",
+                f"📡 Services ({len(services)}):",
+                *svc_lines,
+            ]
+            if len(services) > 15:
+                lines.append(f"  … and {len(services) - 15} more")
+            return "\n".join(lines)
+
+        else:
+            # Grab first page of results
+            results = next(iter(h.search(query, per_page=10, pages=1)), [])
+            if not results:
+                return f"No Censys results for: {query}"
+
+            lines = [f"Censys results for '{query}':\n"]
+            for r in results:
+                ip       = r.get("ip", "?")
+                services = r.get("services", [])
+                ports    = ", ".join(
+                    str(s.get("port", "?")) for s in services[:6]
+                )
+                lines.append(f"  {ip:<18} {ports}")
+            return "\n".join(lines)
+
+    except CensysRateLimitExceededException:
+        return "Censys rate limit exceeded. Try again shortly."
+    except CensysUnauthorizedException:
+        return "Censys auth failed — check your API ID and secret."
+    except Exception as e:
+        return f"Censys error: {e}"
 
 def tool_dns_lookup(
     domain: str,
@@ -264,63 +324,6 @@ def tool_search_pdf(
 
     lines_out.append(f"\n📋 Total hits: {total_hits}")
     return "\n".join(lines_out)
-
-def tool_breach_search(
-    term: str,
-    fields: list[str],
-    wildcard: bool = False,
-    case_sensitive: bool = False,
-    minecraft_only: bool = False,
-) -> str:
-    import requests
-
-    payload = {
-        "term": term,
-        "fields": fields,
-        "wildcard": wildcard,
-        "case_sensitive": case_sensitive,
-    }
-    if minecraft_only:
-        payload["categories"] = ["minecraft"]
-
-    try:
-        resp = requests.post(
-            "https://breach.vip/api/search",
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=15,
-        )
-
-        body = resp.json()
-
-        if resp.status_code == 429:
-            return "⚠️ breach.vip rate limit hit (15 req/min). Try again in a minute."
-        if resp.status_code == 400:
-            return f"Bad request: {body.get('error', 'unknown error')}"
-        if resp.status_code != 200:
-            return f"breach.vip error {resp.status_code}: {body.get('error', resp.text[:200])}"
-
-        results = body["results"]
-        if not results:
-            return f"No breached records found for '{term}' in fields: {', '.join(fields)}."
-
-        lines = [f"Found {len(results)} record(s) for '{term}':\n"]
-        for r in results[:10]:
-            source = r.pop("source", "?")
-            cats = r.pop("categories", "")
-            if isinstance(cats, list):
-                cats = ", ".join(cats)
-            fields_str = " | ".join(f"{k}: {v}" for k, v in r.items() if v)
-            lines.append(f"  [{source}] {fields_str}  (categories: {cats})")
-        if len(results) > 10:
-            lines.append(f"  … and {len(results) - 10} more results.")
-
-        return "\n".join(lines)
-
-    except requests.Timeout:
-        return "breach.vip request timed out."
-    except Exception as e:
-        return f"breach.vip error: {e}"
 
 def tool_generate_usernames(first_name: str, last_name: str) -> list[str]:
     f  = first_name.lower().strip()

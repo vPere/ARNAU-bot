@@ -10,7 +10,7 @@ An AI-powered personal assistant specialized in OSINT and home infrastructure ma
 ### 🔍 OSINT & Reconnaissance
 - **Person search** — generates username/email combinations and searches across breach databases, web, and social media
 - **Username hunt** — checks 300+ platforms simultaneously via Sherlock
-- **Breach search** — queries breach.vip across 10B+ leaked records (email, username, IP, phone, domain, Steam ID, Discord ID, UUID)
+- **Breach search** — queries breach.vip across 10B+ leaked records (email, username, IP, phone, domain, Steam ID, Discord ID, UUID) --> Removed, source down.
 - **Web search** — Brave Search with Google-style dork operators (`site:`, `filetype:`, `inurl:`, etc.)
 - **Page scraping** — extracts emails, phone numbers, and social links from any URL
 - **PDF analysis** — searches text and tables inside PDFs for names, emails, or any term
@@ -19,7 +19,7 @@ An AI-powered personal assistant specialized in OSINT and home infrastructure ma
 - **WHOIS lookup** — registrant, registrar, creation/expiry dates, nameservers
 - **DNS records** — A, MX, TXT, NS, CNAME queries
 - **Subdomain enumeration** — via certificate transparency logs (crt.sh)
-- **Shodan** — search internet-exposed devices or look up a specific IP
+- **Shodan & Censys** — search internet-exposed devices or look up a specific IP
 
 ### 🏠 Home Infrastructure
 - **Network scan** — local network discovery via nmap (IP, MAC, hostname, vendor)
@@ -67,6 +67,8 @@ SHODAN_API_KEY=
 BRAVE_API_KEY=
 OPENWEATHER_API_KEY=
 GOOGLE_MAPS_API_KEY=
+CENSYS_API_ID=
+CENSYS_API_SECRET=
 
 # Network
 HOME_SUBNET=192.168.1.0/24

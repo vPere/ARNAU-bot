@@ -89,42 +89,24 @@ TOOLS = [
         }
     },
     {
-    "name": "breach_search",
+    "name": "censys_query",
     "description": (
-        "Search the breach.vip database for leaked/compromised records across 10B+ entries. "
-        "Supports wildcards: '*' matches zero or more chars, '?' matches exactly one (terms cannot START with a wildcard). "
-        "Rate limit: 15 requests/minute."
+        "Query Censys for internet-connected devices and services. Use type='search' to find devices by keyword/filter, or type='host' to look up details about a specific IP address."
     ),
     "input_schema": {
         "type": "object",
         "properties": {
-            "term": {
+            "type": {
                 "type": "string",
-                "description": "Search term (1–100 chars). Wildcards supported if wildcard=true, e.g. 'user@*.com'"
+                "enum": ["search", "host"],
+                "description": "'search' for a keyword/filter query, 'host' to look up an IP"
             },
-            "fields": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "enum": ["domain", "steamid", "phone", "name", "email",
-                             "username", "password", "ip", "discordid", "uuid"]
-                },
-                "description": "Which field(s) to search. Required. 1–10 fields."
-            },
-            "wildcard": {
-                "type": "boolean",
-                "description": "Enable wildcard operators (* and ?) in the term. Default: false."
-            },
-            "case_sensitive": {
-                "type": "boolean",
-                "description": "Case-sensitive matching. Default: false."
-            },
-            "minecraft_only": {
-                "type": "boolean",
-                "description": "Restrict results to Minecraft-related breaches only. Default: false."
+            "query": {
+                "type": "string",
+                "description": "Search query string or IP address"
             }
         },
-        "required": ["term", "fields"]
+        "required": ["type", "query"]
     }
 },
 {
