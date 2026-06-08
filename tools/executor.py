@@ -17,7 +17,7 @@ def execute_tool(name: str, inputs: dict) -> str:
     elif name == "shodan_query":
         return tool_shodan_query(inputs["type"], inputs["query"])
     elif name == "censys_query":
-    return tool_censys_query(inputs["type"], inputs["query"])
+        return tool_censys_query(inputs["type"], inputs["query"])
     elif name == "scan_network":
         return tool_scan_network(inputs.get("subnet"))
     elif name == "web_search":
