@@ -144,15 +144,13 @@ def tool_censys_query(query_type: str, query: str) -> str:
     except Exception as e:
         return f"Censys error: {e}"
 
-def tool_breach_search(
+async def tool_breach_search(
     term: str,
     fields: list[str],
     wildcard: bool = False,
     case_sensitive: bool = False,
     minecraft_only: bool = False,
 ) -> str:
-    import requests
-
     payload = {
         "term": term,
         "fields": fields,
@@ -162,45 +160,106 @@ def tool_breach_search(
     if minecraft_only:
         payload["categories"] = ["minecraft"]
 
-    try:
-        resp = requests.post(
-            "https://breach.vip/api/search",
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=15,
-        )
+    HEADERS = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "https://breach.vip/",
+        "Referer": "https://breach.vip/",
+    }
 
-        body = resp.json()
-
-        if resp.status_code == 429:
-            return "⚠️ breach.vip rate limit hit (15 req/min). Try again in a minute."
-        if resp.status_code == 400:
-            return f"Bad request: {body.get('error', 'unknown error')}"
-        if resp.status_code != 200:
-            return f"breach.vip error {resp.status_code}: {body.get('error', resp.text[:200])}"
-
-        results = body["results"]
+    def parse_and_format(body: dict) -> str:
+        results = body.get("results", [])
         if not results:
             return f"No breached records found for '{term}' in fields: {', '.join(fields)}."
-
         lines = [f"Found {len(results)} record(s) for '{term}':\n"]
         for r in results[:10]:
+            r = dict(r)
             source = r.pop("source", "?")
             cats = r.pop("categories", "")
             if isinstance(cats, list):
                 cats = ", ".join(cats)
             fields_str = " | ".join(f"{k}: {v}" for k, v in r.items() if v)
-            lines.append(f"  [{source}] {fields_str}  (categories: {cats})")
+            lines.append(f"  [{source}] {fields_str} (categories: {cats})")
         if len(results) > 10:
             lines.append(f"  … and {len(results) - 10} more results.")
-
         return "\n".join(lines)
 
-    except requests.Timeout:
-        return "breach.vip request timed out."
-    except Exception as e:
-        return f"breach.vip error: {e}"
+    def handle_status(status_code: int, body: dict) -> str | None:
+        """Returns an error string if status is not 200, else None."""
+        if status_code == 429:
+            return "breach.vip rate limit hit (15 req/min). Try again in a minute."
+        if status_code == 400:
+            return f"Bad request: {body.get('error', 'unknown error')}"
+        if status_code != 200:
+            return f"breach.vip error {status_code}: {body.get('error', str(body)[:200])}"
+        return None
 
+    # -------------------------
+    # Option 1: curl_cffi async
+    # -------------------------
+    try:
+        from curl_cffi.requests import AsyncSession
+        async with AsyncSession(impersonate="chrome124") as session:
+            resp = await session.post(
+                "https://breach.vip/api/search",
+                json=payload,
+                headers=HEADERS,
+                timeout=15,
+            )
+            body = resp.json()
+            err = handle_status(resp.status_code, body)
+            if err:
+                return err
+            return parse_and_format(body)
+    except ImportError:
+        pass  # curl_cffi not installed, fall through to playwright
+    except Exception as e:
+        curl_err = str(e)
+        if "challenge" not in curl_err.lower() and "cloudflare" not in curl_err.lower():
+            return f"breach.vip error (curl_cffi): {curl_err}"
+        # Otherwise fall through to playwright
+
+    # -------------------------
+    # Option 2: async_playwright
+    # -------------------------
+    try:
+        from playwright.async_api import async_playwright
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(user_agent=HEADERS["User-Agent"])
+            page = await context.new_page()
+
+            # Visit the site first so Cloudflare cookies are set
+            await page.goto("https://breach.vip/", wait_until="networkidle", timeout=30_000)
+
+            # Execute the POST request from inside the browser context
+            result = await page.evaluate(
+                """async ([url, payload, headers]) => {
+                    const resp = await fetch(url, {
+                        method: "POST",
+                        headers: headers,
+                        body: JSON.stringify(payload),
+                    });
+                    return { status: resp.status, body: await resp.json() };
+                }""",
+                ["https://breach.vip/api/search", payload, HEADERS],
+            )
+            await browser.close()
+
+            err = handle_status(result["status"], result["body"])
+            if err:
+                return err
+            return parse_and_format(result["body"])
+
+    except ImportError:
+        return (
+            "Neither curl_cffi nor playwright is installed. "
+            "Run: pip install curl-cffi  or  pip install playwright && playwright install chromium"
+        )
+    except Exception as e:
+        return f"breach.vip error (playwright): {e}"
 
 def tool_dns_lookup(
     domain: str,
