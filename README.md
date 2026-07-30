@@ -10,7 +10,7 @@ An AI-powered personal assistant specialized in OSINT and home infrastructure ma
 ### 🔍 OSINT & Reconnaissance
 - **Person search** — generates username/email combinations and searches across breach databases, web, and social media
 - **Username hunt** — checks 300+ platforms simultaneously via Sherlock
-- **Breach search** — queries breach.vip across 10B+ leaked records (email, username, IP, phone, domain, Steam ID, Discord ID, UUID) --> Removed, source down.
+- **Breach search** — queries breach.vip across 10B+ leaked records (email, username, IP, phone, domain, Steam ID, Discord ID, UUID)
 - **Web search** — Brave Search with Google-style dork operators (`site:`, `filetype:`, `inurl:`, etc.)
 - **Page scraping** — extracts emails, phone numbers, and social links from any URL
 - **PDF analysis** — searches text and tables inside PDFs for names, emails, or any term

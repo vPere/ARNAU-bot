@@ -53,6 +53,14 @@ def execute_tool(name: str, inputs: dict) -> str:
             inputs.get("fuzzy", True),
             inputs.get("context_lines", 2),
         )
+     elif name == "breach_search":
+        return tool_breach_search(
+            inputs["term"],
+            inputs["fields"],
+            inputs.get("wildcard", False),
+            inputs.get("case_sensitive", False),
+            inputs.get("minecraft_only", False),
+        )
     elif name == "scan_host":
         return tool_scan_host(
             inputs["host"],

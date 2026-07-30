@@ -144,6 +144,64 @@ def tool_censys_query(query_type: str, query: str) -> str:
     except Exception as e:
         return f"Censys error: {e}"
 
+def tool_breach_search(
+    term: str,
+    fields: list[str],
+    wildcard: bool = False,
+    case_sensitive: bool = False,
+    minecraft_only: bool = False,
+) -> str:
+    import requests
+
+    payload = {
+        "term": term,
+        "fields": fields,
+        "wildcard": wildcard,
+        "case_sensitive": case_sensitive,
+    }
+    if minecraft_only:
+        payload["categories"] = ["minecraft"]
+
+    try:
+        resp = requests.post(
+            "https://breach.vip/api/search",
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=15,
+        )
+
+        body = resp.json()
+
+        if resp.status_code == 429:
+            return "⚠️ breach.vip rate limit hit (15 req/min). Try again in a minute."
+        if resp.status_code == 400:
+            return f"Bad request: {body.get('error', 'unknown error')}"
+        if resp.status_code != 200:
+            return f"breach.vip error {resp.status_code}: {body.get('error', resp.text[:200])}"
+
+        results = body["results"]
+        if not results:
+            return f"No breached records found for '{term}' in fields: {', '.join(fields)}."
+
+        lines = [f"Found {len(results)} record(s) for '{term}':\n"]
+        for r in results[:10]:
+            source = r.pop("source", "?")
+            cats = r.pop("categories", "")
+            if isinstance(cats, list):
+                cats = ", ".join(cats)
+            fields_str = " | ".join(f"{k}: {v}" for k, v in r.items() if v)
+            lines.append(f"  [{source}] {fields_str}  (categories: {cats})")
+        if len(results) > 10:
+            lines.append(f"  … and {len(results) - 10} more results.")
+
+        return "\n".join(lines)
+
+    except requests.Timeout:
+        return "breach.vip request timed out."
+    except Exception as e:
+        return f"breach.vip error: {e}"
+
+
 def tool_dns_lookup(
     domain: str,
     record_types: list[str] = None,

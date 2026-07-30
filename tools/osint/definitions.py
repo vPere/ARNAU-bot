@@ -68,6 +68,45 @@ TOOLS = [
         "required": ["domain"]
     }
     },
+        {
+    "name": "breach_search",
+    "description": (
+        "Search the breach.vip database for leaked/compromised records across 10B+ entries. "
+        "Supports wildcards: '*' matches zero or more chars, '?' matches exactly one (terms cannot START with a wildcard). "
+        "Rate limit: 15 requests/minute."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "term": {
+                "type": "string",
+                "description": "Search term (1–100 chars). Wildcards supported if wildcard=true, e.g. 'user@*.com'"
+            },
+            "fields": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["domain", "steamid", "phone", "name", "email",
+                             "username", "password", "ip", "discordid", "uuid"]
+                },
+                "description": "Which field(s) to search. Required. 1–10 fields."
+            },
+            "wildcard": {
+                "type": "boolean",
+                "description": "Enable wildcard operators (* and ?) in the term. Default: false."
+            },
+            "case_sensitive": {
+                "type": "boolean",
+                "description": "Case-sensitive matching. Default: false."
+            },
+            "minecraft_only": {
+                "type": "boolean",
+                "description": "Restrict results to Minecraft-related breaches only. Default: false."
+            }
+        },
+        "required": ["term", "fields"]
+    }
+},
     {
     "name": "dns_lookup",
     "description": "Query DNS records for a domain (A, MX, TXT, NS, CNAME) and enumerate subdomains via certificate transparency logs (crt.sh).",
