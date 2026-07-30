@@ -60,7 +60,7 @@ def execute_tool(name: str, inputs: dict) -> str:
             inputs.get("os_detection", True),
             inputs.get("vuln_scan", False),
         )
-     elif name == "breach_search":
+    elif name == "breach_search":
         return tool_breach_search(
             inputs["term"],
             inputs["fields"],
